@@ -41,17 +41,38 @@ sys.modules['__main__'].QuantizedWeight8bit = QuantizedWeight8bit
 
 @contextlib.contextmanager
 def copy_to_shm(file: str):
+    """
+    A context manager to copy a file to shared memory (shm) for improved performance.
+
+    Args:
+        file (str): The path of the file to be copied.
+
+    Yields:
+        str: The path of the copied file in shared memory.
+
+    Raises:
+        FileNotFoundError: If the specified file does not exist.
+
+    Notes:
+        Shared memory (shm) is a memory segment that can be simultaneously accessed
+        by multiple processes. Copying files to shared memory can improve performance
+        for applications that frequently read or write to the file.
+
+    """
     if file.startswith("/dev/shm/"):
         # Nothing to do, the file is already in shared memory.
         yield file
         return
 
     tmp_dir = "/dev/shm/"
+    # Create a temporary file in shared memory.
     fd, tmp_path = tempfile.mkstemp(dir=tmp_dir)
     try:
+        # Copy the original file to the temporary file in shared memory.
         shutil.copyfile(file, tmp_path)
-        yield tmp_path
+        yield tmp_path # Yield the path of the copied file in shared memory.
     finally:
+        # Clean up: remove the temporary file from shared memory.
         os.remove(tmp_path)
         os.close(fd)
 
