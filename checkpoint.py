@@ -79,6 +79,29 @@ def copy_to_shm(file: str):
 
 @contextlib.contextmanager
 def copy_from_shm(file: str):
+    """
+    A context manager to copy data from shared memory to a file.
+
+    Args:
+        file (str): The destination file path to copy the data to.
+
+    Yields:
+        str: The temporary file path where the data is temporarily stored.
+
+    Raises:
+        FileNotFoundError: If the source file specified doesn't exist.
+        PermissionError: If there's an issue with file permissions.
+
+    Notes:
+        This context manager creates a temporary file in the shared memory (/dev/shm) directory,
+        yields the path to the temporary file to the caller, copies the data from the temporary
+        file to the specified destination file, and cleans up by removing the temporary file.
+
+    Example:
+        with copy_from_shm("destination.txt") as tmp_file:
+            # Perform operations on tmp_file, which contains data from shared memory
+            # After the block, the data will be copied to "destination.txt"
+    """
     tmp_dir = "/dev/shm/"
     fd, tmp_path = tempfile.mkstemp(dir=tmp_dir)
     try:
